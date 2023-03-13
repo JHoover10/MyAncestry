@@ -1,0 +1,23 @@
+﻿@page "/person/{Id}"
+
+@inject IDataRepository dataRepository
+
+<h1>@person.LastName, @person.FirstName</h1>
+
+<h2>Born: @(events.SingleOrDefault(x => x.EventType == EventType.Birth)?.DateTime.ToString() ?? "Somehow not alive?")</h2>
+
+<h2>Death: @(events.SingleOrDefault(x => x.EventType == EventType.Death)?.DateTime.ToString() ?? "Not unalive")</h2>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    Person person;
+    List<Event> events;
+
+    protected override async Task OnInitializedAsync()
+    {
+        person = dataRepository.Query<Person, Person>(person => person.Id == Id).Single();
+        events = dataRepository.Query<Event, Event>(x => person.Events.Any(y => y.Id == x.Id)).ToList();
+    }
+}

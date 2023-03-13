@@ -1,6 +1,7 @@
 ﻿@page "/people"
 
 @inject IDataRepository dataRepository
+@inject NavigationManager uriHelper
 
 <h3>People</h3>
 
@@ -13,7 +14,7 @@
             <MudList Clickable="true">
                 @for (int i = 0; i < people.Count; i++)
                 {
-                    <MudListItem Text="@people[i]"/>
+                    <MudListItem Text="@people[i].FirstName" Href=@($"/person/{people[i].Id}")/>
 
                     @if (i + 1 < people.Count)
                     {
@@ -30,11 +31,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        lastNames = dataRepository.GetDistinctLastNames().OrderBy(x => x).ToList();
+        lastNames = dataRepository.Query<Person, string>(selector: person => person.LastName).Distinct().OrderBy(x => x).ToList();
     }
 
-    List<string> GetPeopleWithLastName(string lastName)
+    List<Person> GetPeopleWithLastName(string lastName)
     {
-        return dataRepository.PeopleQuery<string>(person => person.LastName == lastName, person => person.FirstName).OrderBy(x => x).ToList();
+        return dataRepository.Query<Person, Person>(person => person.LastName == lastName).OrderBy(person => person.FirstName).ToList();
+    }
+
+    void ToPerson()
+    {
+        uriHelper.NavigateTo("./person");
     }
 }

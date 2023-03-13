@@ -1,9 +1,9 @@
 ﻿using MyAncestry.Models;
+using System.Linq.Expressions;
 
 namespace MyAncestry.Interfaces;
 
 public interface IDataRepository
 {
-    IEnumerable<string> GetDistinctLastNames();
-    IEnumerable<T> PeopleQuery<T>(Func<Person, bool> predicate, Func<Person, T> select = null);
+    IEnumerable<TResult> Query<TEntity, TResult>(Expression<Func<TEntity, bool>> predicate = null, Func<TEntity, TResult> selector = null);
 }
