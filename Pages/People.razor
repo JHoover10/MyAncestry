@@ -15,7 +15,7 @@
                 {
                     <MudListItem Text="@people[i]"/>
 
-                    @if (i + 2 < people.Count)
+                    @if (i + 1 < people.Count)
                     {
                         <MudDivider />
                     }
@@ -35,6 +35,6 @@
 
     List<string> GetPeopleWithLastName(string lastName)
     {
-        return dataRepository.PeopleQuery<string>(person => person.LastName == lastName, person => person.FirstName).ToList();
+        return dataRepository.PeopleQuery<string>(person => person.LastName == lastName, person => person.FirstName).OrderBy(x => x).ToList();
     }
 }
