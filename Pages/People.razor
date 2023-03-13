@@ -1,0 +1,40 @@
+﻿@page "/people"
+
+@inject IDataRepository dataRepository
+
+<h3>People</h3>
+
+<MudExpansionPanels>
+    @foreach (var lastName in lastNames)
+    {
+        var people = @GetPeopleWithLastName(lastName);
+
+        <MudExpansionPanel Text="@lastName">
+            <MudList Clickable="true">
+                @for (int i = 0; i < people.Count; i++)
+                {
+                    <MudListItem Text="@people[i]"/>
+
+                    @if (i + 2 < people.Count)
+                    {
+                        <MudDivider />
+                    }
+                }
+            </MudList>
+        </MudExpansionPanel>
+    }
+</MudExpansionPanels>
+
+@code {
+    List<string> lastNames;
+
+    protected override async Task OnInitializedAsync()
+    {
+        lastNames = dataRepository.GetDistinctLastNames().OrderBy(x => x).ToList();
+    }
+
+    List<string> GetPeopleWithLastName(string lastName)
+    {
+        return dataRepository.PeopleQuery<string>(person => person.LastName == lastName, person => person.FirstName).ToList();
+    }
+}
