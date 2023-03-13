@@ -61,6 +61,10 @@
               "target": "Package",
               "version": "[13.0.3, )"
             },
+            "PublishSPAforGitHubPages.Build": {
+              "target": "Package",
+              "version": "[2.0.2, )"
+            },
             "automapper": {
               "target": "Package",
               "version": "[12.0.1, )"

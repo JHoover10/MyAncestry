@@ -477,6 +477,12 @@
           }
         }
       },
+      "PublishSPAforGitHubPages.Build/2.0.2": {
+        "type": "package",
+        "build": {
+          "build/PublishSPAforGitHubPages.Build.targets": {}
+        }
+      },
       "System.Diagnostics.DiagnosticSource/6.0.0": {
         "type": "package",
         "dependencies": {
@@ -1048,6 +1054,12 @@
           "lib/net6.0/Newtonsoft.Json.dll": {
             "related": ".xml"
           }
+        }
+      },
+      "PublishSPAforGitHubPages.Build/2.0.2": {
+        "type": "package",
+        "build": {
+          "build/PublishSPAforGitHubPages.Build.targets": {}
         }
       },
       "System.Diagnostics.DiagnosticSource/6.0.0": {
@@ -1897,6 +1909,32 @@
         "packageIcon.png"
       ]
     },
+    "PublishSPAforGitHubPages.Build/2.0.2": {
+      "sha512": "eAlkngAyeBqQR3U8v3kxmnPZk7FgJ3tBtuP2T9D1PQpHPGLNGeGbsyZfeidcaLvd0THGwOiO2T19+Xh1LP1ImA==",
+      "type": "package",
+      "path": "publishspaforgithubpages.build/2.0.2",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "build/PublishSPAforGitHubPages.Build.targets",
+        "bundle/scripts/brotliloader.js",
+        "bundle/scripts/brotliloader.min.js",
+        "bundle/scripts/decode.js",
+        "bundle/scripts/decode.min.js",
+        "nupkg-icon.png",
+        "publishspaforgithubpages.build.2.0.2.nupkg.sha512",
+        "publishspaforgithubpages.build.nuspec",
+        "tools/Brotli.Core.dll",
+        "tools/PublishSPAforGitHubPages.Build.dll",
+        "tools/runtimes/linux/native/brolib_x64.so",
+        "tools/runtimes/linux/native/brolib_x86.so",
+        "tools/runtimes/osx/native/brolib_x64.dylib",
+        "tools/runtimes/win/native/brolib_x64.dll",
+        "tools/runtimes/win/native/brolib_x86.dll"
+      ]
+    },
     "System.Diagnostics.DiagnosticSource/6.0.0": {
       "sha512": "frQDfv0rl209cKm1lnwTgFPzNigy2EKk1BS3uAvHvlBVKe5cymGyHO+Sj+NLv5VF/AhHsqPIUUwya5oV4CHMUw==",
       "type": "package",
@@ -2061,6 +2099,7 @@
       "Microsoft.AspNetCore.Components.WebAssembly.DevServer >= 6.0.13",
       "MudBlazor >= 6.1.9",
       "Newtonsoft.Json >= 13.0.3",
+      "PublishSPAforGitHubPages.Build >= 2.0.2",
       "automapper >= 12.0.1"
     ]
   },
@@ -2123,6 +2162,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.3, )"
+          },
+          "PublishSPAforGitHubPages.Build": {
+            "target": "Package",
+            "version": "[2.0.2, )"
           },
           "automapper": {
             "target": "Package",
