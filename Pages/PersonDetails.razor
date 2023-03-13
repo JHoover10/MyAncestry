@@ -6,7 +6,7 @@
 
 <h2>Born: @(events.SingleOrDefault(x => x.EventType == EventType.Birth)?.DateTime.ToString() ?? "Somehow not alive?")</h2>
 
-<h2>Death: @(events.SingleOrDefault(x => x.EventType == EventType.Death)?.DateTime.ToString() ?? "Not unalive")</h2>
+<h2>Died: @(events.SingleOrDefault(x => x.EventType == EventType.Death)?.DateTime.ToString() ?? "Not unalive")</h2>
 
 @code {
     [Parameter]
