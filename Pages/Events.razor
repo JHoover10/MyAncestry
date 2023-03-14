@@ -8,17 +8,18 @@
             @for (int i = 0; i < events.Count; i++)
             {
                 var alignment = (i % 2 == 0) ? Align.Left : Align.Right;
+                var color = (i % 2 == 0) ? Color.Info : Color.Success;
                 var currentEvent = events[i];
                 var peopleInvoled = people.Where(person => person.Events.Any(x => x.Id == currentEvent.Id)).ToList();
                 var contentTitle = currentEvent.EventType.ToString();
 
-                <MudTimelineItem Color="Color.Info" Size="Size.Small">
+                <MudTimelineItem Color="@color" Size="Size.Small">
                     <ItemOpposite>
-                        <MudText Color="Color.Info" Typo="Typo.h5">@currentEvent.DateTime.ToString("MM/dd/yyyy")</MudText>
+                        <MudText Color="@color" Typo="Typo.h5">@currentEvent.DateTime.ToString("MM/dd/yyyy")</MudText>
 
                         @if (places.Any(place => place.Id == currentEvent.PlaceId))
                         {
-                            <MudText Color="Color.Info" Typo="Typo.h6">@places.Single(place => place.Id == currentEvent.PlaceId).Name</MudText>
+                            <MudText Color="@color" Typo="Typo.h6">@places.Single(place => place.Id == currentEvent.PlaceId).Name</MudText>
                         }
                     </ItemOpposite>
                     <ItemContent>
@@ -31,7 +32,7 @@
                             contentTitle = $"{peopleInvoled[0].LastName}, {peopleInvoled[0].FirstName} & {peopleInvoled[1].LastName}, {peopleInvoled[1].FirstName}: {currentEvent.EventType}";
                         }
 
-                        <MudText Color="Color.Info" Align="alignment" Typo="Typo.h6" GutterBottom="true">@contentTitle</MudText>
+                        <MudText Color="@color" Align="alignment" Typo="Typo.h6" GutterBottom="true">@contentTitle</MudText>
 
                         @if (!string.IsNullOrWhiteSpace(currentEvent.Description))
                         {
@@ -41,6 +42,10 @@
                 </MudTimelineItem>
             }
         </MudTimeline>
+
+        <MudScrollToTop>
+            <MudFab Color="Color.Tertiary" Icon="@Icons.Material.Filled.ArrowCircleUp" />
+        </MudScrollToTop>
     </MudTabPanel>
     <MudTabPanel Text="Table">
         <MudTable Items="@eventRows" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@loading" LoadingProgressColor="Color.Info">

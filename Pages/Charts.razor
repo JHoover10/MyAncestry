@@ -1,0 +1,38 @@
+﻿@page "/charts"
+
+@inject IDataRepository dataRepository
+
+<MudText>Event Freqency</MudText>
+<MudChart ChartType="ChartType.Bar" ChartOptions="@chartOptions" ChartSeries="@chartSeries" XAxisLabels="@monthes" Width="100%" Height="350px"></MudChart>
+
+@code {
+    string[] monthes = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    List<ChartSeries> chartSeries = new List<ChartSeries>();
+    ChartOptions chartOptions = new ChartOptions()
+    {
+        YAxisTicks = 1
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var births = dataRepository.Query<Event, Event>(x => x.EventType == EventType.Birth).GroupBy(x => x.DateTime.Month).OrderBy(x => x.Key).Select(x => x.Count()).ToArray();
+        var marriages = dataRepository.Query<Event, Event>(x => x.EventType == EventType.Marriage).GroupBy(x => x.DateTime.Month).OrderBy(x => x.Key).Select(x => x.Count()).ToArray();
+        var deaths = dataRepository.Query<Event, Event>(x => x.EventType == EventType.Death).GroupBy(x => x.DateTime.Month).OrderBy(x => x.Key).Select(x => x.Count()).ToArray();
+
+        chartSeries.Add(new ChartSeries()
+        {
+            Name = "Births",
+            Data = Array.ConvertAll(births, x => (double)x),
+        });
+        chartSeries.Add(new ChartSeries()
+        {
+            Name = "Marriages",
+            Data = Array.ConvertAll(marriages, x => (double)x),
+        });
+        chartSeries.Add(new ChartSeries()
+        {
+            Name = "Deaths",
+            Data = Array.ConvertAll(deaths, x => (double)x),
+        });
+    }
+}
