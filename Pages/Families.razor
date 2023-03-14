@@ -1,0 +1,48 @@
+﻿@page "/families"
+
+@inject IDataRepository dataRepository
+
+<MudTable Items="@familyRows" Hover="true" SortLabel="Sort By" Breakpoint="Breakpoint.Sm" Loading="@loading" LoadingProgressColor="Color.Info">
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<FamilyRow, object>(x => x.FatherName)">Father</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<FamilyRow, object>(x => x.MotherName)">Mother</MudTableSortLabel></MudTh>
+        <MudTh>Married At</MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<FamilyRow, object>(x => x.DateTime)">Date</MudTableSortLabel></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Event Type">@context.FatherName</MudTd>
+        <MudTd DataLabel="First Name">@context.MotherName</MudTd>
+        <MudTd DataLabel="Married At">@context.Location</MudTd>
+        <MudTd DataLabel="Date">@context.DateTime.ToString("MM/dd/yyyy")</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    bool loading;
+    List<Person> people;
+    List<Family> families;
+    List<FamilyRow> familyRows = new List<FamilyRow>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        families = dataRepository.Query<Family, Family>().ToList();
+        people = dataRepository.Query<Person, Person>().ToList();
+
+        foreach (var family in families)
+        {
+            var father = people.FirstOrDefault(person => person.Id == family.FatherId);
+            var mother = people.FirstOrDefault(person => person.Id == family.MotherId);
+
+            familyRows.Add(new FamilyRow()
+            {
+                FatherName = father == null ? "Unknown" : $"{father.LastName}, {father.FirstName}",
+                MotherName = mother == null ? "Unknown" : $"{mother.LastName}, {mother.FirstName}",
+            });
+        }
+
+        familyRows = familyRows.OrderBy(x => x.FatherName).ToList();
+    }
+}
