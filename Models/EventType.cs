@@ -3,6 +3,7 @@
 public enum EventType
 {
     Unknown,
+    Adopted,
     Birth,
     Death,
     Divorce,
@@ -11,5 +12,8 @@ public enum EventType
     Graduation,
     Immigration,
     Marriage,
+    MilitaryService,
+    Occupation,
     Primary,
+    Retirement,
 }
