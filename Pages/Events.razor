@@ -1,0 +1,99 @@
+﻿@page "/events"
+
+@inject IDataRepository dataRepository
+
+<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+    <MudTabPanel Text="Timeline">
+        <MudTimeline>
+            @for (int i = 0; i < events.Count; i++)
+            {
+                var alignment = (i % 2 == 0) ? Align.Left : Align.Right;
+                var currentEvent = events[i];
+                var peopleInvoled = people.Where(person => person.Events.Any(x => x.Id == currentEvent.Id)).ToList();
+                var contentTitle = currentEvent.EventType.ToString();
+
+                <MudTimelineItem Color="Color.Info" Size="Size.Small">
+                    <ItemOpposite>
+                        <MudText Color="Color.Info" Typo="Typo.h5">@currentEvent.DateTime.ToString("MM/dd/yyyy")</MudText>
+
+                        @if (places.Any(place => place.Id == currentEvent.PlaceId))
+                        {
+                            <MudText Color="Color.Info" Typo="Typo.h6">@places.Single(place => place.Id == currentEvent.PlaceId).Name</MudText>
+                        }
+                    </ItemOpposite>
+                    <ItemContent>
+                        @if (peopleInvoled.Count == 1)
+                        {
+                            contentTitle = $"{peopleInvoled[0].LastName}, {peopleInvoled[0].FirstName}: {currentEvent.EventType}";
+                        }
+                        else if (peopleInvoled.Count == 2)
+                        {
+                            contentTitle = $"{peopleInvoled[0].LastName}, {peopleInvoled[0].FirstName} & {peopleInvoled[1].LastName}, {peopleInvoled[1].FirstName}: {currentEvent.EventType}";
+                        }
+
+                        <MudText Color="Color.Info" Align="alignment" Typo="Typo.h6" GutterBottom="true">@contentTitle</MudText>
+
+                        @if (!string.IsNullOrWhiteSpace(currentEvent.Description))
+                        {
+                            <MudText Align="alignment">@currentEvent.Description</MudText>
+                        }
+                    </ItemContent>
+                </MudTimelineItem>
+            }
+        </MudTimeline>
+    </MudTabPanel>
+    <MudTabPanel Text="Table">
+        <MudTable Items="@eventRows" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@loading" LoadingProgressColor="Color.Info">
+            <HeaderContent>
+                <MudTh>Event Type</MudTh>
+                <MudTh>First Name</MudTh>
+                <MudTh>Nickname</MudTh>
+                <MudTh>Last Name</MudTh>
+                <MudTh>Location</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<EventRow, object>(x => x.DateTime)">Date</MudTableSortLabel></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Event Type">@context.EventType</MudTd>
+                <MudTd DataLabel="First Name">@context.FirstName</MudTd>
+                <MudTd DataLabel="Nickname">@context.Nickname</MudTd>
+                <MudTd DataLabel="Last Name">@context.LastName</MudTd>
+                <MudTd DataLabel="Location">@context.Location</MudTd>
+                <MudTd DataLabel="Date">@context.DateTime.ToString("MM/dd/yyyy")</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+    </MudTabPanel>
+</MudTabs>
+
+@code {
+    List<EventRow> eventRows = new List<EventRow>();
+    List<Event> events;
+    List<Place> places;
+    List<Person> people;
+    bool loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        events = dataRepository.Query<Event, Event>(x => x.DateTime != DateTime.MinValue).OrderBy(x => x.DateTime).ToList();
+        places = dataRepository.Query<Place, Place>().ToList();
+        people = dataRepository.Query<Person, Person>().ToList();
+
+        foreach (var item in events)
+        {
+            var person = people.FirstOrDefault(person => person.Events.Any(x => x.Id == item.Id));
+            var place = places.FirstOrDefault(place => place.Id == item.PlaceId);
+
+            eventRows.Add(new EventRow()
+            {
+                EventType = item.EventType,
+                DateTime = item.DateTime,
+                FirstName = person == null ? "Unknown" : person.FirstName,
+                Nickname = person == null ? string.Empty : person.Nickname,
+                LastName = person == null ? "Unknown" : person.LastName,
+                Location = place == null ? "Unknown" : place.Name,
+            });
+        }
+    }
+}

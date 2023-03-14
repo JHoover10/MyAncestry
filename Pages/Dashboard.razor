@@ -1,9 +1,38 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+@inject IDataRepository dataRepository
 
-<h1>Hello, world!</h1>
+<MudTable Items="@surnameFrequency" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@loading" LoadingProgressColor="Color.Info">
+    <HeaderContent>
+        <MudTh>Surname</MudTh>
+        <MudTh>Number of People</MudTh>
+        <MudTh>Percentage</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Surname">@context.Item1</MudTd>
+        <MudTd DataLabel="Number of People">@context.Item2</MudTd>
+        <MudTd DataLabel="Percentage">@($"{context.Item2 % totalPeople}%")</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
 
-Welcome to your new app.
+<MudDivider Style="padding-top: 15px; padding-bottom: 15px"></MudDivider>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<MudText>Total unique surnames: @uniqueSurnames</MudText>
+<MudText>Total people: @totalPeople</MudText>
+
+@code {
+    int uniqueSurnames;
+    int totalPeople;
+    List<(string, int)> surnameFrequency;
+    bool loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        uniqueSurnames = dataRepository.Query<Person, string>(selector: person => person.LastName).Distinct().Count();
+        totalPeople = dataRepository.Query<Person, Person>().Count();
+        surnameFrequency = dataRepository.Query<Person, string>(selector: person => person.LastName).GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => (x.Key, x.Count())).ToList();
+    }
+}

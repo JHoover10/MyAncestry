@@ -8,6 +8,7 @@ public enum EventType
     Divorce,
     Emigration,
     Family,
+    Graduation,
     Immigration,
     Marriage,
     Primary,

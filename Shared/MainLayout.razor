@@ -5,7 +5,7 @@
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+        <MudText Typo="Typo.h5" Class="ml-3">My Ancestry</MudText>
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
@@ -13,7 +13,11 @@
         <MudPaper Width="100%" Elevation="0">
             <MudNavMenu Rounded="true" Margin="Margin.Dense" Color="Color.Primary" Class="pa-2">
                 <MudNavLink Href="./" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
-                <MudNavLink Href="./people" Icon="@Icons.Material.Filled.People">People</MudNavLink>
+                <MudNavLink Href="./people" Icon="@Icons.Material.Filled.Person">People</MudNavLink>
+                <MudNavLink Href="./families" Icon="@Icons.Material.Filled.People">Families</MudNavLink>
+                <MudNavLink Href="./chart" Icon="@Icons.Material.Outlined.AccountTree">Chart</MudNavLink>
+                <MudNavLink Href="./events" Icon="@Icons.Material.Outlined.Event">Events</MudNavLink>
+                <MudNavLink Href="./geography" Icon="@Icons.Material.Outlined.Public">Geography</MudNavLink>
             </MudNavMenu>
         </MudPaper>
     </MudDrawer>
@@ -21,6 +25,7 @@
         <MudPaper Style="padding: 25px">@Body</MudPaper>
     </MudMainContent>
 </MudLayout>
+
 @code {
     bool _drawerOpen = true;
 

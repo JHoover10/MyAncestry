@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MyAncestry.Models;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 using static MudBlazor.Colors;
 
 namespace MyAncestry;
@@ -20,8 +21,10 @@ public class AutoMapperProfile : Profile
 
         CreateMap<JToken, Event>()
             .ForMember(dest => dest.Id, src => src.MapFrom(x => x["handle"]))
-            .ForMember(dest => dest.EventType, src => src.MapFrom(x => ParseEnumOrDefault(x.SelectToken("type.string").Value<string>() ?? string.Empty, EventType.Unknown)))
-            .ForMember(dest => dest.DateTime, src => src.MapFrom(x => ParseDateTime(x.SelectToken("date.text").Value<string>() ?? string.Empty)))
+            .ForMember(dest => dest.PlaceId, src => src.MapFrom(x => x["place"]))
+            .ForMember(dest => dest.Description, src => src.MapFrom(x => x["description"]))
+            .ForMember(dest => dest.EventType, src => src.MapFrom(x => ParseEnumOrDefault(x.SelectToken("type.string").Value<string>(), EventType.Unknown)))
+            .ForMember(dest => dest.DateTime, src => src.MapFrom(x => ParseDateTime(x.SelectToken("date.dateval") as JArray)))
             ;
 
         CreateMap<JToken, Family>()
@@ -41,11 +44,25 @@ public class AutoMapperProfile : Profile
             ;
     }
 
-    private static DateTime ParseDateTime(string dateTime)
+    private static DateTime ParseDateTime(JArray token)
     {
-        if (dateTime != null && DateTime.TryParse(dateTime, out var result)) 
+        try
         {
-            return result;
+            var day = token[0].ToString();
+            var month = token[1].ToString();
+            var year = token[2].ToString();
+
+            if (DateTime.TryParse($"{month}/{day}/{year}", out var result))
+            {
+                return result;
+            }
+            else if (Regex.IsMatch(year, @"\d\d\d\d"))
+            {
+                return DateTime.Parse($"1/1/{year}");
+            }
+        }
+        catch (Exception)
+        {
         }
 
         return DateTime.MinValue;

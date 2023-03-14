@@ -4,9 +4,36 @@
 
 <h1>@person.LastName, @person.FirstName</h1>
 
-<h2>Born: @(events.SingleOrDefault(x => x.EventType == EventType.Birth)?.DateTime.ToString() ?? "Somehow not alive?")</h2>
+<h2>Born: @(events.SingleOrDefault(x => x.EventType == EventType.Birth)?.DateTime.ToString("MM/dd/yyyy") ?? "Somehow not alive?")</h2>
 
-<h2>Died: @(events.SingleOrDefault(x => x.EventType == EventType.Death)?.DateTime.ToString() ?? "Not unalive")</h2>
+<h2>Died: @(events.SingleOrDefault(x => x.EventType == EventType.Death)?.DateTime.ToString("MM/dd/yyyy") ?? "Not unalive")</h2>
+
+<MudTimeline>
+    @for (int i = 0; i < events.Count; i++)
+    {
+        var alignment = (i % 2 == 0) ? Align.Left : Align.Right;
+        var currentEvent = events[i];
+
+        <MudTimelineItem Color="Color.Info" Size="Size.Small">
+            <ItemOpposite>
+                <MudText Color="Color.Info" Typo="Typo.h5">@currentEvent.DateTime.ToString("MM/dd/yyyy")</MudText>
+
+                @if (places.Any(place => place.Id == currentEvent.PlaceId))
+                {
+                    <MudText Color="Color.Info" Typo="Typo.h6">@places.Single(place => place.Id == currentEvent.PlaceId).Name</MudText>
+                }
+            </ItemOpposite>
+            <ItemContent>
+                <MudText Color="Color.Info" Align="alignment" Typo="Typo.h6" GutterBottom="true">@currentEvent.EventType</MudText>
+
+                @if (!string.IsNullOrWhiteSpace(currentEvent.Description))
+                {
+                    <MudText Align="alignment">@currentEvent.Description</MudText>
+                }
+            </ItemContent>
+        </MudTimelineItem>
+    }
+</MudTimeline>
 
 @code {
     [Parameter]
@@ -14,10 +41,12 @@
 
     Person person;
     List<Event> events;
+    List<Place> places;
 
     protected override async Task OnInitializedAsync()
     {
         person = dataRepository.Query<Person, Person>(person => person.Id == Id).Single();
-        events = dataRepository.Query<Event, Event>(x => person.Events.Any(y => y.Id == x.Id)).ToList();
+        events = dataRepository.Query<Event, Event>(x => person.Events.Any(y => y.Id == x.Id)).OrderBy(x => x.DateTime).ToList();
+        places = dataRepository.Query<Place, Place>(place => events.Any(x => x.PlaceId == place.Id)).ToList();
     }
 }
