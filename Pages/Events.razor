@@ -10,7 +10,7 @@
                 var alignment = (i % 2 == 0) ? Align.Left : Align.Right;
                 var color = (i % 2 == 0) ? Color.Info : Color.Success;
                 var currentEvent = events[i];
-                var peopleInvoled = people.Where(person => person.Events.Any(x => x.Id == currentEvent.Id)).ToList();
+                var peopleInvoled = people.Where(person => person.EventLinks.Any(x => x.Id == currentEvent.Id)).ToList();
                 var contentTitle = currentEvent.EventType.ToString();
 
                 <MudTimelineItem Color="@color" Size="Size.Small">
@@ -87,7 +87,7 @@
 
         foreach (var item in events)
         {
-            var person = people.FirstOrDefault(person => person.Events.Any(x => x.Id == item.Id));
+            var person = people.FirstOrDefault(person => person.EventLinks.Any(x => x.Id == item.Id));
             var place = places.FirstOrDefault(place => place.Id == item.PlaceId);
 
             eventRows.Add(new EventRow()

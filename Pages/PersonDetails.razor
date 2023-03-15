@@ -46,7 +46,7 @@
     protected override async Task OnInitializedAsync()
     {
         person = dataRepository.Query<Person, Person>(person => person.Id == Id).Single();
-        events = dataRepository.Query<Event, Event>(x => person.Events.Any(y => y.Id == x.Id)).OrderBy(x => x.DateTime).ToList();
+        events = dataRepository.Query<Event, Event>(x => person.EventLinks.Any(y => y.Id == x.Id)).OrderBy(x => x.DateTime).ToList();
         places = dataRepository.Query<Place, Place>(place => events.Any(x => x.PlaceId == place.Id)).ToList();
     }
 }

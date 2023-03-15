@@ -1,0 +1,14 @@
+﻿@page "/family-tree"
+
+@inject IDataRepository dataRepository
+
+<div class="my-main" style="border-style: solid;">
+    <Panzoom WheelMode="@WheelMode.ZoomWithWheel">
+        <!-- Must set the element's reference (@ref)! -->
+        <img @ref="@context.ElementReference" src="/images/Graphview.svg" alt="image" />
+    </Panzoom>
+</div>
+
+@code
+{
+}

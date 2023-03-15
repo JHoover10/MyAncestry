@@ -15,8 +15,9 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.FirstName, src => src.MapFrom(x => x["primary_name"]["first_name"]))
             .ForMember(dest => dest.LastName, src => src.MapFrom(x => x["primary_name"]["surname_list"][0]["surname"]))
             .ForMember(dest => dest.Nickname, src => src.MapFrom(x => x["primary_name"]["nick"]))
-            .ForMember(dest => dest.Families, src => src.MapFrom(x => x["parent_family_list"]))
-            .ForMember(dest => dest.Events, src => src.MapFrom(x => GetEventIds(x["event_ref_list"])))
+            .ForMember(dest => dest.FamilyIds, src => src.MapFrom(x => x["family_list"]))
+            .ForMember(dest => dest.ParentIds, src => src.MapFrom(x => x["parent_family_list"]))
+            .ForMember(dest => dest.EventLinks, src => src.MapFrom(x => GetEventIds(x["event_ref_list"])))
             ;
 
         CreateMap<JToken, Event>()
