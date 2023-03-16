@@ -22,7 +22,7 @@ public class AutoMapperProfile : Profile
 
         CreateMap<JToken, Event>()
             .ForMember(dest => dest.Id, src => src.MapFrom(x => x["handle"]))
-            .ForMember(dest => dest.PlaceId, src => src.MapFrom(x => x["place"]))
+            .ForMember(dest => dest.PlaceId, src => src.MapFrom(x => Parse(x["place"])))
             .ForMember(dest => dest.Description, src => src.MapFrom(x => x["description"]))
             .ForMember(dest => dest.EventType, src => src.MapFrom(x => ParseEnumOrDefault(x.SelectToken("type.string").Value<string>(), EventType.Unknown)))
             .ForMember(dest => dest.DateTime, src => src.MapFrom(x => ParseDateTime(x.SelectToken("date.dateval") as JArray)))
@@ -43,6 +43,11 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Latitude, src => src.MapFrom(x => x["lat"]))
             .ForMember(dest => dest.Longitude, src => src.MapFrom(x => x["long"]))
             ;
+    }
+
+    private string Parse(JToken token)
+    {
+        return string.IsNullOrWhiteSpace(token.ToString()) ? null : token.ToString();
     }
 
     private static DateTime ParseDateTime(JArray token)

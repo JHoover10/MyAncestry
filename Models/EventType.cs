@@ -13,6 +13,8 @@ public enum EventType
     Immigration,
     Marriage,
     MilitaryService,
+    Moving,
+    Notable,
     Occupation,
     Primary,
     Retirement,

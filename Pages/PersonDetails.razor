@@ -2,11 +2,14 @@
 
 @inject IDataRepository dataRepository
 
-<h1>@person.LastName, @person.FirstName</h1>
+<h1>@person.FirstName @person.LastName</h1>
 
-<h2>Born: @(events.SingleOrDefault(x => x.EventType == EventType.Birth)?.DateTime.ToString("MM/dd/yyyy") ?? "Somehow not alive?")</h2>
+<h2>@(born ?? "Somehow not alive?")</h2>
 
-<h2>Died: @(events.SingleOrDefault(x => x.EventType == EventType.Death)?.DateTime.ToString("MM/dd/yyyy") ?? "Not unalive")</h2>
+@if (died != null)
+{
+    <h2>@(died)</h2>
+}
 
 <MudTimeline>
     @for (int i = 0; i < events.Count; i++)
@@ -42,11 +45,98 @@
     Person person;
     List<Event> events;
     List<Place> places;
+    string born = null;
+    string died = null;
+    string children = null;
 
     protected override async Task OnInitializedAsync()
     {
         person = dataRepository.Query<Person, Person>(person => person.Id == Id).Single();
         events = dataRepository.Query<Event, Event>(x => person.EventLinks.Any(y => y.Id == x.Id)).OrderBy(x => x.DateTime).ToList();
         places = dataRepository.Query<Place, Place>(place => events.Any(x => x.PlaceId == place.Id)).ToList();
+
+        SetBornText();
+        SetDiedText();
+        SetMarriageText();
+        SetChildrenText();
+        SetParentText();
+    }
+
+    private void SetBornText()
+    {
+        Event birthday = events.SingleOrDefault(x => x.EventType == EventType.Birth);
+        bool isDead = events.SingleOrDefault(x => x.EventType == EventType.Death) != null;
+
+        if (birthday == null)
+        {
+            born = "Born: Somehow not alive?";
+            return;
+        }
+
+        StringBuilder bornTextBuilder = new StringBuilder();
+        int age = DateTime.Now.Year - birthday.DateTime.Year;
+
+        if (birthday.DateTime > DateTime.Now.AddYears(-age))
+        {
+            age--;
+        }
+
+        if (isDead)
+        {
+            bornTextBuilder.Append($"Born: {birthday.DateTime.ToString("MMMM dd, yyyy")}");
+        }
+        else
+        {
+            bornTextBuilder.Append($"Born: {birthday.DateTime.ToString("MMMM dd, yyyy")} (age {age})");
+        }
+
+        if (birthday.PlaceId != null)
+        {
+            Place birthPlace = places.Single(place => place.Id == birthday.PlaceId);
+            bornTextBuilder.Append($" {birthPlace.Name}");
+        }
+
+        born = bornTextBuilder.ToString();
+    }
+
+    private void SetDiedText()
+    {
+        Event death = events.SingleOrDefault(x => x.EventType == EventType.Death);
+
+        if (death == null)
+        {
+            return;
+        }
+
+        Event birthday = events.SingleOrDefault(x => x.EventType == EventType.Birth);
+        StringBuilder diedTextBuilder = new StringBuilder();
+        int age = death.DateTime.Year - birthday.DateTime.Year;
+
+        if (birthday.DateTime > DateTime.Now.AddYears(-age))
+        {
+            age--;
+        }
+
+        diedTextBuilder.Append($"Died: {death.DateTime.ToString("MMMM dd, yyyy")} (aged {age})");
+
+        if (death.PlaceId != null)
+        {
+            Place deathPlace = places.Single(place => place.Id == death.PlaceId);
+            diedTextBuilder.Append($" {deathPlace.Name}");
+        }
+
+        died = diedTextBuilder.ToString();
+    }
+
+    private void SetMarriageText()
+    { 
+    }
+
+    private void SetChildrenText()
+    {
+    }
+
+    private void SetParentText()
+    { 
     }
 }
