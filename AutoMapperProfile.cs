@@ -33,7 +33,7 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Id, src => src.MapFrom(x => x["handle"]))
             .ForMember(dest => dest.FatherId, src => src.MapFrom(x => x["father_handle"]))
             .ForMember(dest => dest.MotherId, src => src.MapFrom(x => x["mother_handle"]))
-            .ForMember(dest => dest.FamilyType, src => src.MapFrom(x => Enum.Parse<FamilyType>(x["type"]["string"].Value<string>())))
+            .ForMember(dest => dest.FamilyType, src => src.MapFrom(x => ParseEnumOrDefault(x["type"]["string"].Value<string>(), FamilyType.Unknown)))
             .ForMember(dest => dest.Children, src => src.MapFrom(x => x["child_ref_list"]))
             .ForMember(dest => dest.Events, src => src.MapFrom(x => GetEventIds(x["event_ref_list"])))
             ;
@@ -41,7 +41,7 @@ public class AutoMapperProfile : Profile
         CreateMap<JToken, Place>()
             .ForMember(dest => dest.Id, src => src.MapFrom(x => x["handle"]))
             .ForMember(dest => dest.Name, src => src.MapFrom(x => x["name"]["value"]))
-            .ForMember(dest => dest.PlaceType, src => src.MapFrom(x => Enum.Parse<PlaceType>(x["place_type"]["string"].Value<string>())))
+            .ForMember(dest => dest.PlaceType, src => src.MapFrom(x => ParseEnumOrDefault(x["place_type"]["string"].Value<string>(), PlaceType.Unknown)))
             .ForMember(dest => dest.Latitude, src => src.MapFrom(x => x["lat"]))
             .ForMember(dest => dest.Longitude, src => src.MapFrom(x => x["long"]))
             ;
