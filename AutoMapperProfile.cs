@@ -12,7 +12,8 @@ public class AutoMapperProfile : Profile
     {
         CreateMap<JToken, Person>()
             .ForMember(dest => dest.Id, src => src.MapFrom(x => x["handle"]))
-            .ForMember(dest => dest.FirstName, src => src.MapFrom(x => x["primary_name"]["first_name"]))
+            .ForMember(dest => dest.FirstName, src => src.MapFrom(x => GetFirstName(x["primary_name"]["first_name"])))
+            .ForMember(dest => dest.MiddleName, src => src.MapFrom(x => GetMiddleName(x["primary_name"]["first_name"])))
             .ForMember(dest => dest.LastName, src => src.MapFrom(x => x["primary_name"]["surname_list"][0]["surname"]))
             .ForMember(dest => dest.Nickname, src => src.MapFrom(x => x["primary_name"]["nick"]))
             .ForMember(dest => dest.FamilyIds, src => src.MapFrom(x => x["family_list"]))
@@ -33,6 +34,7 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.FatherId, src => src.MapFrom(x => x["father_handle"]))
             .ForMember(dest => dest.MotherId, src => src.MapFrom(x => x["mother_handle"]))
             .ForMember(dest => dest.FamilyType, src => src.MapFrom(x => Enum.Parse<FamilyType>(x["type"]["string"].Value<string>())))
+            .ForMember(dest => dest.Children, src => src.MapFrom(x => x["child_ref_list"]))
             .ForMember(dest => dest.Events, src => src.MapFrom(x => GetEventIds(x["event_ref_list"])))
             ;
 
@@ -43,6 +45,29 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Latitude, src => src.MapFrom(x => x["lat"]))
             .ForMember(dest => dest.Longitude, src => src.MapFrom(x => x["long"]))
             ;
+
+        CreateMap<JToken, Child>()
+            .ForMember(dest => dest.Id, src => src.MapFrom(x => x["ref"]))
+            .ForMember(dest => dest.FatherRelation, src => src.MapFrom(x => ParseEnumOrDefault(x.SelectToken("frel.string").Value<string>(), Relation.Unknown)))
+            .ForMember(dest => dest.MotherRelation, src => src.MapFrom(x => ParseEnumOrDefault(x.SelectToken("mrel.string").Value<string>(), Relation.Unknown)))
+            ;
+    }
+
+    private string GetFirstName(JToken token)
+    {
+        return token.ToString().Split(' ')[0];
+    }
+
+    private string GetMiddleName(JToken token)
+    {
+        var names = token.ToString().Split(' ');
+
+        if (names.Length == 1)
+        {
+            return string.Empty;
+        }
+
+        return string.Join(' ', names[1..]);
     }
 
     private string Parse(JToken token)

@@ -23,9 +23,21 @@
 <MudText>Total unique surnames: @uniqueSurnames</MudText>
 <MudText>Total people: @totalPeople</MudText>
 
-@code {
+<MudDivider Style="padding-top: 15px; padding-bottom: 15px"></MudDivider>
+
+<MudText>Missing first names: @missingFirstNames</MudText>
+<MudText>Missing last names: @missingLastNames</MudText>
+<MudText>Missing birthdays: @missingBirthdays</MudText>
+<MudText>Missing marriage dates: @missingMarriages</MudText>
+
+@code 
+{
     int uniqueSurnames;
     int totalPeople;
+    int missingFirstNames;
+    int missingLastNames;
+    int missingBirthdays;
+    int missingMarriages;
     List<(string, int)> surnameFrequency;
     bool loading;
 
@@ -34,5 +46,9 @@
         uniqueSurnames = dataRepository.Query<Person, string>(selector: person => person.LastName).Distinct().Count();
         totalPeople = dataRepository.Query<Person, Person>().Count();
         surnameFrequency = dataRepository.Query<Person, string>(selector: person => person.LastName).GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => (x.Key, x.Count())).ToList();
+        missingFirstNames = dataRepository.Query<Person, Person>(person => string.IsNullOrWhiteSpace(person.FirstName)).Count();
+        missingLastNames = dataRepository.Query<Person, Person>(person => string.IsNullOrWhiteSpace(person.LastName)).Count();
+        missingBirthdays = totalPeople - dataRepository.Query<Event, Event>(evt => evt.EventType == EventType.Birth).Count();
+        missingMarriages = dataRepository.Query<Family, Family>().Count(); dataRepository.Query<Event, Event>(evt => evt.EventType == EventType.Marriage).Count();
     }
 }

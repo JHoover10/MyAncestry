@@ -2,13 +2,28 @@
 
 @inject IDataRepository dataRepository
 
-<h1>@person.FirstName @person.LastName</h1>
+<h1>@person.FirstName @person.MiddleName @person.LastName</h1>
 
 <h2>@(born ?? "Somehow not alive?")</h2>
 
 @if (died != null)
 {
     <h2>@(died)</h2>
+}
+
+@if (partners.Any())
+{
+    <h2>@(partners)</h2>
+}
+
+@if (children != null)
+{
+    <h2>@(children)</h2>
+}
+
+@if (parents != null)
+{
+    <h2>@(parents)</h2>
 }
 
 <MudTimeline>
@@ -45,9 +60,11 @@
     Person person;
     List<Event> events;
     List<Place> places;
+    string partners = null;
     string born = null;
     string died = null;
     string children = null;
+    string parents = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -57,8 +74,7 @@
 
         SetBornText();
         SetDiedText();
-        SetMarriageText();
-        SetChildrenText();
+        SetFamilyText();
         SetParentText();
     }
 
@@ -128,15 +144,58 @@
         died = diedTextBuilder.ToString();
     }
 
-    private void SetMarriageText()
-    { 
-    }
-
-    private void SetChildrenText()
+    private void SetFamilyText()
     {
+        var family = dataRepository.Query<Family, Family>(family => family.Id == person.FamilyIds.First()).FirstOrDefault();
+
+        if (family == null)
+        {
+            return;
+        }
+
+        var partner = dataRepository.Query<Person, Person>(person => person.Id == family.MotherId).SingleOrDefault();
+
+        if (partner != null)
+        {
+            partners = $"Spouse: {partner.FirstName}";
+        }
+
+        var children = dataRepository.Query<Person, Person>(person => family.Children.Any(child => child.Id == person.Id));
+
+        if (children.Any())
+        {
+            this.children = $"Children: {string.Join(", ", children.Select(child => child.FirstName))}";
+        }        
     }
 
     private void SetParentText()
-    { 
+    {
+        var parentFamily = dataRepository.Query<Family, Family>(family => family.Children.Any(child => child.Id == person.Id)).SingleOrDefault();
+
+        if (parentFamily == null)
+        {
+            return;
+        }
+
+        var father = dataRepository.Query<Person, Person>(person => person.Id == parentFamily.FatherId).SingleOrDefault();
+        var mother = dataRepository.Query<Person, Person>(person => person.Id == parentFamily.MotherId).SingleOrDefault();
+
+        var parentsBuilder = new StringBuilder("Parents: ");
+
+        if (father != null)
+        {
+            parentsBuilder.Append($"{father.FirstName} {father.MiddleName} {father.LastName}, ");
+        }
+
+        if (mother != null)
+        {
+            parentsBuilder.Append($"{mother.FirstName} {mother.MiddleName} {mother.LastName}");
+        }
+        else
+        {
+            parentsBuilder.Remove(parentsBuilder.Length - 2, 2);
+        }
+
+        parents = parentsBuilder.ToString();
     }
 }
