@@ -11,7 +11,7 @@
     <h2>@(died)</h2>
 }
 
-@if (partners.Any())
+@if (partners != null)
 {
     <h2>@(partners)</h2>
 }
@@ -26,38 +26,43 @@
     <h2>@(parents)</h2>
 }
 
-<MudTimeline>
-    @for (int i = 0; i < events.Count; i++)
-    {
-        var alignment = (i % 2 == 0) ? Align.Left : Align.Right;
-        var currentEvent = events[i];
+@if (events.Any())
+{
+    <MudTimeline>
+        @for (int i = 0; i < events.Count; i++)
+        {
+            var alignment = (i % 2 == 0) ? Align.Left : Align.Right;
+            var currentEvent = events[i];
 
-        <MudTimelineItem Color="Color.Info" Size="Size.Small">
-            <ItemOpposite>
-                <MudText Color="Color.Info" Typo="Typo.h5">@currentEvent.DateTime.ToString("MM/dd/yyyy")</MudText>
+            <MudTimelineItem Color="Color.Info" Size="Size.Small">
+                <ItemOpposite>
+                    <MudText Color="Color.Info" Typo="Typo.h5">@currentEvent.DateTime.ToString("MM/dd/yyyy")</MudText>
 
-                @if (places.Any(place => place.Id == currentEvent.PlaceId))
-                {
-                    <MudText Color="Color.Info" Typo="Typo.h6">@places.Single(place => place.Id == currentEvent.PlaceId).Name</MudText>
-                }
-            </ItemOpposite>
-            <ItemContent>
-                <MudText Color="Color.Info" Align="alignment" Typo="Typo.h6" GutterBottom="true">@currentEvent.EventType</MudText>
+                    @if (places.Any(place => place.Id == currentEvent.PlaceId))
+                    {
+                        <MudText Color="Color.Info" Typo="Typo.h6">@places.Single(place => place.Id == currentEvent.PlaceId).Name</MudText>
+                    }
+                </ItemOpposite>
+                <ItemContent>
+                    <MudText Color="Color.Info" Align="alignment" Typo="Typo.h6" GutterBottom="true">@currentEvent.EventType</MudText>
 
-                @if (!string.IsNullOrWhiteSpace(currentEvent.Description))
-                {
-                    <MudText Align="alignment">@currentEvent.Description</MudText>
-                }
-            </ItemContent>
-        </MudTimelineItem>
-    }
-</MudTimeline>
+                    @if (!string.IsNullOrWhiteSpace(currentEvent.Description))
+                    {
+                        <MudText Align="alignment">@currentEvent.Description</MudText>
+                    }
+                </ItemContent>
+            </MudTimelineItem>
+        }
+    </MudTimeline>
+}
 
 @code {
     [Parameter]
     public string Id { get; set; }
 
     Person person;
+    DateTime bornDateTime = DateTime.MinValue;
+    DateTime diedDateTime = DateTime.MaxValue;
     List<Event> events;
     List<Place> places;
     string partners = null;
@@ -69,13 +74,31 @@
     protected override async Task OnInitializedAsync()
     {
         person = dataRepository.Query<Person, Person>(person => person.Id == Id).Single();
-        events = dataRepository.Query<Event, Event>(x => person.EventLinks.Any(y => y.Id == x.Id)).OrderBy(x => x.DateTime).ToList();
+        events = dataRepository.Query<Event, Event>(x => person.EventLinks.Any(y => y.Id == x.Id)).ToList();
         places = dataRepository.Query<Place, Place>(place => events.Any(x => x.PlaceId == place.Id)).ToList();
 
         SetBornText();
         SetDiedText();
         SetFamilyText();
         SetParentText();
+
+        var isEventTooOld = (Event evt) =>
+        {
+            if (diedDateTime != DateTime.MaxValue)
+            {
+                return evt.DateTime > diedDateTime;
+            }
+
+            if (bornDateTime != DateTime.MinValue)
+            {
+                return evt.DateTime.Year - bornDateTime.Year > 110;
+            }
+
+            return true;
+        };
+
+        events.AddRange(dataRepository.Query<Event, Event>(evt => evt.EventType == EventType.HistoricEvent && evt.DateTime > bornDateTime && evt.DateTime < diedDateTime && !isEventTooOld(evt)).ToList());
+        events = events.OrderBy(evt => evt.DateTime).ToList();
     }
 
     private void SetBornText()
@@ -112,6 +135,7 @@
             bornTextBuilder.Append($" {birthPlace.Name}");
         }
 
+        this.bornDateTime = birthday.DateTime;
         born = bornTextBuilder.ToString();
     }
 
@@ -141,19 +165,21 @@
             diedTextBuilder.Append($" {deathPlace.Name}");
         }
 
+        this.diedDateTime = death.DateTime;
         died = diedTextBuilder.ToString();
     }
 
     private void SetFamilyText()
     {
-        var family = dataRepository.Query<Family, Family>(family => family.Id == person.FamilyIds.First()).FirstOrDefault();
+        var family = dataRepository.Query<Family, Family>(family => family.Id == person.FamilyIds.FirstOrDefault()).FirstOrDefault();
 
         if (family == null)
         {
             return;
         }
 
-        var partner = dataRepository.Query<Person, Person>(person => person.Id == family.MotherId).SingleOrDefault();
+        var partnerId = family.FatherId == person.Id ? family.MotherId : family.FatherId;
+        var partner = dataRepository.Query<Person, Person>(person => person.Id == partnerId).SingleOrDefault();
 
         if (partner != null)
         {

@@ -10,6 +10,7 @@ public enum EventType
     Emigration,
     Family,
     Graduation,
+    HistoricEvent,
     Immigration,
     Marriage,
     MilitaryService,
@@ -17,5 +18,5 @@ public enum EventType
     Notable,
     Occupation,
     Primary,
-    Retirement,
+    Retirement
 }

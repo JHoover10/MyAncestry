@@ -101,7 +101,7 @@ public class AutoMapperProfile : Profile
 
     private static T ParseEnumOrDefault<T>(string value, T defaultValue) where T : struct, Enum
     {
-        if (value != null && Enum.TryParse(value, out T result))
+        if (value != null && Enum.TryParse(value.Replace(" ", string.Empty), out T result))
         {
             return result;
         }
